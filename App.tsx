@@ -45,7 +45,7 @@ const INITIAL_PRODUCTS: Product[] = [
 export default function App() {
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
   const [currentUser, setCurrentUser] = useState<User>(users[0]);
-  const [view, setView] = useState<ViewState>('LOGIN'); // Uygulama login ekranı ile başlar
+  const [view, setView] = useState<ViewState>('LOGIN');
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -69,7 +69,6 @@ export default function App() {
   }, [products]);
 
   const handleLogin = (email: string, pass: string) => {
-    // Demo login mantığı
     if (email === 'demo@assetpro.com' && pass === '123456') {
       setView('DASHBOARD');
     } else {
@@ -119,7 +118,6 @@ export default function App() {
     }
   };
 
-  // Login görünümü ise sadece Login bileşenini render et
   if (view === 'LOGIN') {
     return <Login onLogin={handleLogin} />;
   }
@@ -215,4 +213,67 @@ export default function App() {
               value={searchQuery}
               onChange={e => {
                 setSearchQuery(e.target.value);
-                if (view !== 'LIST') setView('LIST
+                if (view !== 'LIST') setView('LIST');
+              }}
+              className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-transparent rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:bg-white focus:border-indigo-100 outline-none text-sm text-black transition-all"
+            />
+          </div>
+          <div className="flex items-center gap-4 ml-8">
+             {hasPermission('EDIT_PRODUCT') && (
+               <button 
+                  onClick={handleNavigateToAddProduct}
+                  className="bg-indigo-600 text-white px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2"
+                >
+                  <ICONS.Plus /> Ürün Ekle
+               </button>
+             )}
+          </div>
+        </header>
+
+        <div className="flex-1 overflow-y-auto p-8">
+          {view === 'DASHBOARD' && <Dashboard products={products} onNavigate={setView} />}
+          {view === 'LIST' && (
+            <ProductList 
+              products={filteredProducts} 
+              onView={(p) => { setSelectedProduct(p); setView('DETAIL'); }}
+              onDelete={(id) => {
+                if(window.confirm("Bu ürünü silmek istediğinize emin misiniz?")) {
+                  setProducts(p => p.filter(x => x.id !== id));
+                }
+              }}
+              onEdit={(p) => { setSelectedProduct(p); setView('FORM'); }}
+              canDelete={hasPermission('DELETE_PRODUCT')}
+            />
+          )}
+          {view === 'USER_MANAGEMENT' && (
+            <UserManagement users={users} onAddUser={handleAddUser} onDeleteUser={handleDeleteUser} />
+          )}
+          {view === 'PRICING' && (
+            <Pricing currentProductCount={products.length} onSelectPlan={(plan) => {
+              alert(`${plan} seçildi. Ödeme sayfasına yönlendiriliyorsunuz...`);
+              setView('DASHBOARD');
+            }} />
+          )}
+          {view === 'DETAIL' && selectedProduct && (
+            <ProductDetail product={selectedProduct} userRole={currentUser.role} onBack={() => setView('LIST')} onEdit={() => setView('FORM')} />
+          )}
+          {view === 'FORM' && (
+            <ProductForm 
+              initialData={selectedProduct || undefined} 
+              categories={uniqueCategories} 
+              userRole={currentUser.role} 
+              onSave={handleSaveProduct} 
+              onCancel={() => setView('LIST')} 
+            />
+          )}
+          {view === 'BULK_UPDATE' && (
+            <BulkUpdateView onBulkUpdate={() => {
+              alert("Dosya başarıyla işlendi. Envanter güncellendi.");
+              setView('LIST');
+            }} onCancel={() => setView('DASHBOARD')} />
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
