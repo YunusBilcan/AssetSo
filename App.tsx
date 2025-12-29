@@ -1,17 +1,18 @@
 
 import React, { useState, useMemo } from 'react';
-import { Product, ViewState, AssetType, ActivityLog, User, UserRole, PERMISSIONS } from './types';
-import { ICONS } from './constants';
-import Dashboard from './components/Dashboard';
-import ProductList from './components/ProductList';
-import ProductDetail from './components/ProductDetail';
-import ProductForm from './components/ProductForm';
-import BulkUpdateView from './components/BulkUpdateView';
-import UserManagement from './components/UserManagement';
-import Pricing from './components/Pricing';
+import { Product, ViewState, AssetType, ActivityLog, User, UserRole, PERMISSIONS } from './types.ts';
+import { ICONS } from './constants.tsx';
+import Dashboard from './components/Dashboard.tsx';
+import ProductList from './components/ProductList.tsx';
+import ProductDetail from './components/ProductDetail.tsx';
+import ProductForm from './components/ProductForm.tsx';
+import BulkUpdateView from './components/BulkUpdateView.tsx';
+import UserManagement from './components/UserManagement.tsx';
+import Pricing from './components/Pricing.tsx';
+import Login from './components/Login.tsx';
 
 const INITIAL_USERS: User[] = [
-  { id: 'u1', name: 'Ahmet Yılmaz', role: UserRole.ADMIN },
+  { id: 'u1', name: 'Ahmet Yılmaz', role: UserRole.ADMIN, email: 'demo@assetpro.com' },
   { id: 'u2', name: 'Ayşe Kaya', role: UserRole.MANAGER },
   { id: 'u3', name: 'Mehmet Can', role: UserRole.VIEWER },
 ];
@@ -44,7 +45,7 @@ const INITIAL_PRODUCTS: Product[] = [
 export default function App() {
   const [users, setUsers] = useState<User[]>(INITIAL_USERS);
   const [currentUser, setCurrentUser] = useState<User>(users[0]);
-  const [view, setView] = useState<ViewState>('DASHBOARD');
+  const [view, setView] = useState<ViewState>('LOGIN'); // Uygulama login ekranı ile başlar
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -67,6 +68,21 @@ export default function App() {
     return Array.from(cats).filter(Boolean).sort();
   }, [products]);
 
+  const handleLogin = (email: string, pass: string) => {
+    // Demo login mantığı
+    if (email === 'demo@assetpro.com' && pass === '123456') {
+      setView('DASHBOARD');
+    } else {
+      alert("Hatalı giriş bilgileri. Lütfen demo bilgilerini kullanın.");
+    }
+  };
+
+  const handleLogout = () => {
+    if (window.confirm("Oturumu kapatmak istediğinize emin misiniz?")) {
+      setView('LOGIN');
+    }
+  };
+
   const handleAddUser = (user: User) => {
     setUsers(prev => [...prev, user]);
   };
@@ -79,7 +95,6 @@ export default function App() {
   const handleSaveProduct = (data: Product) => {
     if (!hasPermission('EDIT_PRODUCT')) return alert("Yetkiniz yok.");
     
-    // SaaS Limit Check: Only for NEW products
     if (!data.id && products.length >= 10) {
       alert("Ücretsiz plan limitine (10 ürün) ulaştınız. Lütfen paketinizi yükseltin.");
       setView('PRICING');
@@ -104,9 +119,14 @@ export default function App() {
     }
   };
 
+  // Login görünümü ise sadece Login bileşenini render et
+  if (view === 'LOGIN') {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
-      <aside className="w-72 bg-white border-r border-gray-100 flex flex-col z-20">
+      <aside className="w-72 bg-white border-r border-gray-100 flex flex-col z-20 shadow-sm">
         <div className="p-8">
           <div className="flex items-center gap-3 mb-10">
             <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
@@ -115,21 +135,21 @@ export default function App() {
             <h1 className="text-xl font-bold text-gray-900 tracking-tight">AssetPro <span className="text-indigo-600">PIM</span></h1>
           </div>
           
-          <nav className="space-y-2">
+          <nav className="space-y-1.5">
             {[
               { id: 'DASHBOARD' as ViewState, label: 'Panel', icon: <ICONS.Dashboard /> },
               { id: 'LIST' as ViewState, label: 'Envanter Bankası', icon: <ICONS.Package /> },
               { id: 'USER_MANAGEMENT' as ViewState, label: 'Kullanıcılar', icon: <ICONS.Users />, hidden: !hasPermission('MANAGE_USERS') },
               { id: 'PRICING' as ViewState, label: 'Abonelik & Fiyat', icon: <ICONS.Info /> },
-              { id: 'BULK_UPDATE' as ViewState, label: 'Toplu Güncelleme', icon: <ICONS.Edit />, hidden: !hasPermission('EDIT_PRICE') },
+              { id: 'BULK_UPDATE' as ViewState, label: 'Toplu İşlemler', icon: <ICONS.Edit />, hidden: !hasPermission('EDIT_PRICE') },
             ].filter(i => !i.hidden).map(item => (
               <button
                 key={item.id}
                 onClick={() => setView(item.id)}
-                className={`w-full flex items-center gap-4 px-4 py-3 rounded-xl font-medium transition-all ${
+                className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl font-bold text-[13px] transition-all ${
                   view === item.id 
-                  ? 'bg-indigo-50 text-indigo-600 shadow-sm border border-indigo-100' 
-                  : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                  ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-100' 
+                  : 'text-gray-400 hover:bg-gray-50 hover:text-indigo-600'
                 }`}
               >
                 {item.icon}
@@ -141,10 +161,10 @@ export default function App() {
 
         <div className="mt-auto p-8 space-y-4">
           <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
-            <p className="text-[10px] font-bold text-gray-400 uppercase mb-2 tracking-widest">Aktif Kullanıcı</p>
+            <p className="text-[9px] font-black text-gray-400 uppercase mb-3 tracking-[0.15em] ml-1">Kullanıcı Değiştir</p>
             <div className="relative group">
               <select 
-                className="w-full bg-white text-black text-xs border border-gray-200 rounded-lg p-3 font-bold outline-none ring-offset-0 focus:ring-2 focus:ring-indigo-600 appearance-none cursor-pointer hover:border-indigo-400 transition-all shadow-sm"
+                className="w-full bg-white text-black text-[11px] border border-gray-200 rounded-xl p-3 font-bold outline-none ring-offset-0 focus:ring-2 focus:ring-indigo-600 appearance-none cursor-pointer hover:border-indigo-400 transition-all shadow-sm"
                 value={currentUser.id}
                 onChange={(e) => setCurrentUser(users.find(u => u.id === e.target.value)!)}
               >
@@ -152,7 +172,7 @@ export default function App() {
                   <option 
                     key={u.id} 
                     value={u.id} 
-                    className="bg-white text-black py-2 hover:bg-indigo-600 hover:text-white"
+                    className="bg-white text-black py-2"
                   >
                     {u.name} ({u.role})
                   </option>
@@ -163,20 +183,29 @@ export default function App() {
               </div>
             </div>
           </div>
-          <div className="p-4 bg-indigo-600 rounded-2xl text-white shadow-xl shadow-indigo-100/50">
-            <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center font-bold text-white shadow-inner border border-white/10">{currentUser.name.charAt(0)}</div>
+          
+          <div className="flex flex-col gap-2">
+            <div className="p-4 bg-white rounded-2xl border border-gray-100 flex items-center gap-3">
+               <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-sm shadow-inner border border-indigo-100">{currentUser.name.charAt(0)}</div>
                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold truncate leading-none">{currentUser.name}</p>
-                  <p className="text-[9px] opacity-80 mt-1 uppercase font-black tracking-[0.1em]">{currentUser.role}</p>
+                  <p className="text-xs font-bold truncate leading-none text-gray-900">{currentUser.name}</p>
+                  <p className="text-[9px] text-gray-400 mt-1 uppercase font-black tracking-widest">{currentUser.role}</p>
                </div>
             </div>
+            
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center justify-center gap-2 py-3 bg-red-50 text-red-500 rounded-2xl text-[11px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all border border-red-100/30"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+              Çıkış Yap
+            </button>
           </div>
         </div>
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-10">
+        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-10 shadow-sm">
           <div className="flex-1 max-w-2xl relative">
             <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-gray-400">
               <ICONS.Search />
@@ -186,60 +215,4 @@ export default function App() {
               value={searchQuery}
               onChange={e => {
                 setSearchQuery(e.target.value);
-                if (view !== 'LIST') setView('LIST');
-              }}
-              className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none text-sm text-black transition-all"
-            />
-          </div>
-          <div className="flex items-center gap-4 ml-8">
-             {hasPermission('EDIT_PRODUCT') && (
-               <button 
-                  onClick={handleNavigateToAddProduct}
-                  className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 flex items-center gap-2"
-                >
-                  <ICONS.Plus /> Ürün Ekle
-               </button>
-             )}
-          </div>
-        </header>
-
-        <div className="flex-1 overflow-y-auto p-8">
-          {view === 'DASHBOARD' && <Dashboard products={products} onNavigate={setView} />}
-          {view === 'LIST' && (
-            <ProductList 
-              products={filteredProducts} 
-              onView={(p) => { setSelectedProduct(p); setView('DETAIL'); }}
-              onDelete={(id) => setProducts(p => p.filter(x => x.id !== id))}
-              onEdit={(p) => { setSelectedProduct(p); setView('FORM'); }}
-              canDelete={hasPermission('DELETE_PRODUCT')}
-            />
-          )}
-          {view === 'USER_MANAGEMENT' && (
-            <UserManagement users={users} onAddUser={handleAddUser} onDeleteUser={handleDeleteUser} />
-          )}
-          {view === 'PRICING' && (
-            <Pricing currentProductCount={products.length} onSelectPlan={(plan) => {
-              alert(`${plan} seçildi. Ödeme sayfasına yönlendiriliyorsunuz...`);
-              setView('DASHBOARD');
-            }} />
-          )}
-          {view === 'DETAIL' && selectedProduct && (
-            <ProductDetail product={selectedProduct} userRole={currentUser.role} onBack={() => setView('LIST')} onEdit={() => setView('FORM')} />
-          )}
-          {view === 'FORM' && (
-            <ProductForm 
-              initialData={selectedProduct || undefined} 
-              categories={uniqueCategories} 
-              userRole={currentUser.role} 
-              onSave={handleSaveProduct} 
-              onCancel={() => setView('LIST')} 
-            />
-          )}
-          {view === 'BULK_UPDATE' && (
-            <BulkUpdateView onBulkUpdate={() => setView('LIST')} onCancel={() => setView('DASHBOARD')} />
-          )}
-        </div>
-      </main>
-    </div>
-  );
-}
+                if (view !== 'LIST') setView('LIST

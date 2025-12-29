@@ -17,6 +17,7 @@ export enum UserRole {
 export interface User {
   id: string;
   name: string;
+  email?: string;
   role: UserRole;
   avatar?: string;
 }
@@ -63,7 +64,7 @@ export interface Product {
   activeFeatures: string[];
 }
 
-export type ViewState = 'DASHBOARD' | 'LIST' | 'DETAIL' | 'FORM' | 'BULK_UPDATE' | 'USER_MANAGEMENT' | 'PRICING';
+export type ViewState = 'LOGIN' | 'DASHBOARD' | 'LIST' | 'DETAIL' | 'FORM' | 'BULK_UPDATE' | 'USER_MANAGEMENT' | 'PRICING';
 
 export const PERMISSIONS = {
   EDIT_PRODUCT: [UserRole.ADMIN, UserRole.MANAGER],
