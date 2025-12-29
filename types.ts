@@ -8,6 +8,19 @@ export enum AssetType {
   MANUAL = 'MANUAL'
 }
 
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  MANAGER = 'MANAGER',
+  VIEWER = 'VIEWER'
+}
+
+export interface User {
+  id: string;
+  name: string;
+  role: UserRole;
+  avatar?: string;
+}
+
 export interface Asset {
   id: string;
   type: AssetType;
@@ -40,6 +53,8 @@ export interface Product {
   category: string;
   currentPrice: number;
   currency: string;
+  stock: number;
+  entryDate: string;
   variantCodes: string[];
   assets: Asset[];
   priceHistory: PriceRecord[];
@@ -48,13 +63,13 @@ export interface Product {
   activeFeatures: string[];
 }
 
-export type ViewState = 'DASHBOARD' | 'LIST' | 'DETAIL' | 'FORM' | 'BULK_UPDATE';
+export type ViewState = 'DASHBOARD' | 'LIST' | 'DETAIL' | 'FORM' | 'BULK_UPDATE' | 'USER_MANAGEMENT' | 'PRICING';
 
-export const DEFAULT_FEATURES = [
-  { id: 'manuals', label: 'User Manuals', icon: 'Book' },
-  { id: 'certificates', label: 'Certificates', icon: 'Shield' },
-  { id: 'procurement', label: 'Procurement Docs', icon: 'FileText' },
-  { id: 'video_gallery', label: 'Video Gallery', icon: 'Video' },
-  { id: 'price_history', label: 'Price History Chart', icon: 'TrendingUp' },
-  { id: 'variants', label: 'Variant Management', icon: 'Layers' }
-];
+export const PERMISSIONS = {
+  EDIT_PRODUCT: [UserRole.ADMIN, UserRole.MANAGER],
+  DELETE_PRODUCT: [UserRole.ADMIN],
+  EDIT_PRICE: [UserRole.ADMIN, UserRole.MANAGER],
+  UPLOAD_ASSETS: [UserRole.ADMIN, UserRole.MANAGER],
+  VIEW_AUDIT_LOGS: [UserRole.ADMIN],
+  MANAGE_USERS: [UserRole.ADMIN],
+};
