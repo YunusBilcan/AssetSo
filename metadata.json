@@ -1,0 +1,7 @@
+{
+  "name": "AssetPro PIM - Enterprise Asset Management",
+  "description": "A high-performance product information and asset management system with dynamic field configuration, e-commerce style detail views, and AI-powered insights.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
