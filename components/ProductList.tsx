@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Product } from '../types';
 import { ICONS } from '../constants';
 
@@ -8,24 +8,10 @@ interface ProductListProps {
   onView: (p: Product) => void;
   onEdit: (p: Product) => void;
   onDelete: (id: string) => void;
-  onBulkUpdate: (content: string) => void;
 }
 
-const ProductList: React.FC<ProductListProps> = ({ products, onView, onEdit, onDelete, onBulkUpdate }) => {
+const ProductList: React.FC<ProductListProps> = ({ products, onView, onEdit, onDelete }) => {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('grid');
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const text = event.target?.result as string;
-        onBulkUpdate(text);
-      };
-      reader.readAsText(file);
-    }
-  };
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-500">
@@ -35,19 +21,6 @@ const ProductList: React.FC<ProductListProps> = ({ products, onView, onEdit, onD
           <p className="text-sm text-gray-500">Managing {products.length} registered asset profiles</p>
         </div>
         <div className="flex items-center gap-4">
-          <input 
-            type="file" 
-            ref={fileInputRef} 
-            onChange={handleFileChange} 
-            accept=".csv" 
-            className="hidden" 
-          />
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            className="text-sm font-bold text-gray-600 hover:text-indigo-600 flex items-center gap-2"
-          >
-            <ICONS.Edit /> Bulk Price Update
-          </button>
           <div className="flex bg-white p-1 rounded-xl border border-gray-200">
             <button 
               onClick={() => setViewMode('grid')}

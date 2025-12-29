@@ -48,7 +48,7 @@ export interface Product {
   activeFeatures: string[];
 }
 
-export type ViewState = 'DASHBOARD' | 'LIST' | 'DETAIL' | 'FORM';
+export type ViewState = 'DASHBOARD' | 'LIST' | 'DETAIL' | 'FORM' | 'BULK_UPDATE';
 
 export const DEFAULT_FEATURES = [
   { id: 'manuals', label: 'User Manuals', icon: 'Book' },

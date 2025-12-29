@@ -6,6 +6,7 @@ import Dashboard from './components/Dashboard';
 import ProductList from './components/ProductList';
 import ProductDetail from './components/ProductDetail';
 import ProductForm from './components/ProductForm';
+import BulkUpdateView from './components/BulkUpdateView';
 
 const CURRENT_USER = "Jane Doe";
 
@@ -91,7 +92,10 @@ export default function App() {
     let updatedCount = 0;
 
     lines.forEach(line => {
-      const [sku, priceStr, reasonStr] = line.split(',').map(s => s.trim());
+      const parts = line.split(',').map(s => s.trim());
+      if (parts.length < 2) return;
+      
+      const [sku, priceStr, reasonStr] = parts;
       const price = parseFloat(priceStr);
       const reason = reasonStr || 'Bulk Price Adjustment';
       
@@ -126,6 +130,9 @@ export default function App() {
     if (updatedCount > 0) {
       setProducts(newProducts);
       alert(`${updatedCount} products updated successfully.`);
+      setView('LIST');
+    } else {
+      alert("No matching SKUs found or file format is incorrect.");
     }
   };
 
@@ -144,6 +151,7 @@ export default function App() {
             {[
               { id: 'DASHBOARD' as ViewState, label: 'Dashboard', icon: <ICONS.Dashboard /> },
               { id: 'LIST' as ViewState, label: 'Inventory Bank', icon: <ICONS.Package /> },
+              { id: 'BULK_UPDATE' as ViewState, label: 'Bulk Update', icon: <ICONS.Edit /> },
             ].map(item => (
               <button
                 key={item.id}
@@ -186,7 +194,7 @@ export default function App() {
               value={searchQuery}
               onChange={e => {
                 setSearchQuery(e.target.value);
-                if (view !== 'LIST') setView('LIST');
+                if (view !== 'LIST' && view !== 'BULK_UPDATE') setView('LIST');
               }}
               className="w-full pl-12 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm"
             />
@@ -209,14 +217,13 @@ export default function App() {
         </header>
 
         <div className="flex-1 overflow-y-auto p-8">
-          {view === 'DASHBOARD' && <Dashboard products={products} onNavigate={setView} onBulkUpdate={handleBulkPriceUpdate} />}
+          {view === 'DASHBOARD' && <Dashboard products={products} onNavigate={setView} />}
           {view === 'LIST' && (
             <ProductList 
               products={filteredProducts} 
               onView={(p) => { setSelectedProduct(p); setView('DETAIL'); }}
               onDelete={handleDeleteProduct}
               onEdit={(p) => { setSelectedProduct(p); setView('FORM'); }}
-              onBulkUpdate={handleBulkPriceUpdate}
             />
           )}
           {view === 'DETAIL' && selectedProduct && (
@@ -231,6 +238,12 @@ export default function App() {
               initialData={selectedProduct || undefined}
               onSave={handleSaveProduct}
               onCancel={() => setView('LIST')}
+            />
+          )}
+          {view === 'BULK_UPDATE' && (
+            <BulkUpdateView 
+              onBulkUpdate={handleBulkPriceUpdate} 
+              onCancel={() => setView('DASHBOARD')} 
             />
           )}
         </div>
