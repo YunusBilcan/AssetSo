@@ -63,37 +63,55 @@ const Dashboard: React.FC<DashboardProps> = ({ products, onNavigate }) => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-h-[400px]">
           <div className="p-6 border-b border-gray-50 flex justify-between items-center">
             <h2 className="font-bold text-gray-900">Son Envanter Kayıtları</h2>
-            <button 
-              onClick={() => onNavigate('LIST')}
-              className="text-sm text-indigo-600 font-medium hover:underline"
-            >
-              Hepsini gör
-            </button>
+            {products.length > 0 && (
+              <button 
+                onClick={() => onNavigate('LIST')}
+                className="text-sm text-indigo-600 font-medium hover:underline"
+              >
+                Hepsini gör
+              </button>
+            )}
           </div>
           <div className="divide-y divide-gray-50">
-            {recentProducts.map((p) => (
-              <div key={p.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center gap-4">
-                <img 
-                  src={p.assets[0]?.url || `https://picsum.photos/seed/${p.id}/100/100`} 
-                  className="w-12 h-12 rounded-lg object-cover bg-gray-100" 
-                  alt={p.name}
-                />
-                <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900">{p.name}</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] bg-gray-100 text-black font-bold uppercase px-1.5 py-0.5 rounded tracking-wide">{p.category}</span>
-                    <p className="text-xs text-gray-500">SKU: {p.sku}</p>
+            {products.length > 0 ? (
+              recentProducts.map((p) => (
+                <div key={p.id} className="p-4 hover:bg-gray-50 transition-colors flex items-center gap-4">
+                  <img 
+                    src={p.assets[0]?.url || `https://picsum.photos/seed/${p.id}/100/100`} 
+                    className="w-12 h-12 rounded-lg object-cover bg-gray-100" 
+                    alt={p.name}
+                  />
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900">{p.name}</h4>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-[10px] bg-gray-100 text-black font-bold uppercase px-1.5 py-0.5 rounded tracking-wide">{p.category}</span>
+                      <p className="text-xs text-gray-500">SKU: {p.sku}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-bold text-gray-900">${p.currentPrice.toLocaleString()}</p>
+                    <p className="text-xs text-gray-400">{p.assets.length} döküman</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">${p.currentPrice.toLocaleString()}</p>
-                  <p className="text-xs text-gray-400">{p.assets.length} döküman</p>
-                </div>
+              ))
+            ) : (
+              <div className="p-20 text-center flex flex-col items-center justify-center">
+                 <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
+                    <ICONS.Package />
+                 </div>
+                 <h3 className="text-lg font-bold text-gray-900">Henüz Hiç Ürün Yok</h3>
+                 <p className="text-gray-400 text-sm mt-1 max-w-xs">Envanter bankanız boş görünüyor. Hemen ilk ürününüzü ekleyerek başlayın.</p>
+                 <button 
+                   onClick={() => onNavigate('FORM')}
+                   className="mt-6 text-indigo-600 font-black text-xs uppercase tracking-widest hover:underline"
+                 >
+                   + İlk Ürünü Ekle
+                 </button>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
